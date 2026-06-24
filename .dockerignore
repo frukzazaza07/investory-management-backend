@@ -1,0 +1,20 @@
+# Git
+.git
+.gitignore
+
+# Env 
+.env
+
+# Go build cache
+*.exe
+*.test
+*.out
+
+# IDE
+.vscode
+.idea
+
+# Docker files themselves
+Dockerfile
+docker-compose.yml
+.dockerignore
