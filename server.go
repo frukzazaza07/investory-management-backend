@@ -15,7 +15,6 @@ import (
 
 	_ "investory-management-backend/docs"
 	"investory-management-backend/internal/database"
-	"investory-management-backend/internal/repository"
 	"investory-management-backend/internal/router"
 
 	"github.com/gofiber/fiber/v3"
@@ -25,7 +24,10 @@ import (
 func main() {
 	godotenv.Load()
 	database.Connect()
-	database.DB.AutoMigrate(&repository.User{})
+	database.Migrate()
+	if os.Getenv("SEED") == "true" {
+		database.Seed()
+	}
 
 	app := fiber.New()
 	router.SetupRoutes(app)

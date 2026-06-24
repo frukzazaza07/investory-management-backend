@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"investory-management-backend/internal/models"
 	"investory-management-backend/internal/repository"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,7 +24,7 @@ func Register(email, password string) error {
 		return err
 	}
 
-	user := &repository.User{
+	user := &models.User{
 		Email:    email,
 		Password: string(hashed),
 	}

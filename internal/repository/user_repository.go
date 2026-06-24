@@ -2,20 +2,15 @@ package repository
 
 import (
 	"investory-management-backend/internal/database"
+	"investory-management-backend/internal/models"
 )
 
-type User struct {
-	ID       uint   `gorm:"primaryKey"`
-	Email    string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
-}
-
-func GetUserByEmail(email string) (*User, error) {
-	var user User
+func GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
 	result := database.DB.Where("email = ?", email).First(&user)
 	return &user, result.Error
 }
 
-func CreateUser(user *User) error {
+func CreateUser(user *models.User) error {
 	return database.DB.Create(user).Error
 }
