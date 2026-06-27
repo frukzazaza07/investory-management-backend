@@ -20,6 +20,37 @@ func Migrate() {
 				return tx.Migrator().DropTable(&models.User{})
 			},
 		},
+		{
+			ID: "20260627000001",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(
+					&models.Supplier{},
+					&models.InventoryItem{},
+					&models.Product{},
+					&models.ProductInventoryMapping{},
+					&models.PurchaseOrder{},
+					&models.PurchaseOrderItem{},
+					&models.StockTransaction{},
+					&models.PosSaleLog{},
+					&models.WebhookSubscription{},
+					&models.WebhookDeliveryLog{},
+				)
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable(
+					&models.WebhookDeliveryLog{},
+					&models.WebhookSubscription{},
+					&models.PosSaleLog{},
+					&models.StockTransaction{},
+					&models.PurchaseOrderItem{},
+					&models.PurchaseOrder{},
+					&models.ProductInventoryMapping{},
+					&models.Product{},
+					&models.InventoryItem{},
+					&models.Supplier{},
+				)
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

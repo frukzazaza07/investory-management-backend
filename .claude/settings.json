@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Process -Name \"go\" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; cd \"d:\\\\projects\\\\investory-management-backend\"; $proc = Start-Process -FilePath \"go\" -ArgumentList \"run\",\"server.go\" -PassThru -RedirectStandardOutput \"$env:TEMP\\\\inv-server.log\" -RedirectStandardError \"$env:TEMP\\\\inv-server-err.log\"; Start-Sleep -Seconds 5; Get-Content \"$env:TEMP\\\\inv-server-err.log\" -ErrorAction SilentlyContinue | Select-String -Pattern \"started|error|failed\" -CaseSensitive:$false | Select-Object -Last 5)",
+      "PowerShell(Stop-Process -Id 22776 -Force; Start-Sleep -Seconds 2; cd \"d:\\\\projects\\\\investory-management-backend\"; $proc = Start-Process -FilePath \"go\" -ArgumentList \"run\",\"server.go\" -PassThru -RedirectStandardOutput \"$env:TEMP\\\\inv-server.log\" -RedirectStandardError \"$env:TEMP\\\\inv-server-err.log\"; Start-Sleep -Seconds 5; Get-Content \"$env:TEMP\\\\inv-server-err.log\" -ErrorAction SilentlyContinue | Select-Object -Last 5)",
+      "PowerShell(cd \"d:\\\\projects\\\\investory-management-backend\"; powershell -ExecutionPolicy Bypass -File \".\\\\scripts\\\\test_endpoints.ps1\" 2>&1)",
+      "PowerShell(Stop-Process -Id 19348 -Force; Start-Sleep -Seconds 2; cd \"d:\\\\projects\\\\investory-management-backend\"; $proc = Start-Process -FilePath \"go\" -ArgumentList \"run\",\"server.go\" -PassThru -RedirectStandardOutput \"$env:TEMP\\\\inv-server.log\" -RedirectStandardError \"$env:TEMP\\\\inv-server-err.log\"; Start-Sleep -Seconds 5; Get-Content \"$env:TEMP\\\\inv-server-err.log\" | Select-Object -Last 3)"
+    ]
+  }
+}
