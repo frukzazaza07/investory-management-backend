@@ -1,3 +1,22 @@
-*.db
+# Environment files — only .env.example should be committed
 .env
-pg_data
+.env.local
+.env.*.local
+.env.*
+!.env.example
+
+# Database
+*.db
+pg_data/
+
+# Go binaries
+*.exe
+*.exe~
+server
+
+# Build artifacts
+/dist/
+/tmp/
+
+# Claude Code local config
+.claude/
