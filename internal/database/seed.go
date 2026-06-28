@@ -109,6 +109,14 @@ func seedProducts() {
 				{ID: "bom-cap-cup-001", ProductID: "prod-cappuccino-001", InventoryItemID: "inv-cup-hot-001", QuantityRequired: 1},
 			},
 		},
+		{
+			product: models.Product{Base: models.Base{ID: "prod-espresso-001"}, POSProductID: "pos-espresso", Name: "Espresso", SKU: "BEV-ESPRESSO", IsActive: true},
+			bom: []models.ProductInventoryMapping{
+				{ID: "bom-esp-coffee-001", ProductID: "prod-espresso-001", InventoryItemID: "inv-coffee-beans-001", QuantityRequired: 18},
+				{ID: "bom-esp-water-001", ProductID: "prod-espresso-001", InventoryItemID: "inv-water-001", QuantityRequired: 30},
+				{ID: "bom-esp-cup-001", ProductID: "prod-espresso-001", InventoryItemID: "inv-cup-hot-001", QuantityRequired: 1},
+			},
+		},
 	}
 
 	for _, p := range products {

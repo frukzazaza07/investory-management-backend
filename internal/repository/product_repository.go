@@ -66,7 +66,7 @@ func ReplaceBOM(productID string, items []models.ProductInventoryMapping) error 
 func GetProductsByInventoryItemID(inventoryItemID string) ([]models.Product, error) {
 	var products []models.Product
 	err := database.DB.
-		Joins("JOIN product_inventory_mappings pm ON pm.product_id = products.id AND pm.deleted_at IS NULL").
+		Joins("JOIN product_inventory_mappings pm ON pm.product_id = products.id").
 		Where("pm.inventory_item_id = ?", inventoryItemID).
 		Find(&products).Error
 	return products, err
