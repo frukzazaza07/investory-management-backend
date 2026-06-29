@@ -84,7 +84,7 @@ func seedProducts() {
 		bom     []models.ProductInventoryMapping
 	}{
 		{
-			product: models.Product{Base: models.Base{ID: "prod-americano-001"}, POSProductID: "pos-americano", Name: "Americano", SKU: "BEV-AMERICANO", IsActive: true},
+			product: models.Product{Base: models.Base{ID: "prod-americano-001"}, POSProductID: "pos-americano", Name: "Americano", SKU: "BEV-AMERICANO", Barcode: "8850001000016", IsActive: true},
 			bom: []models.ProductInventoryMapping{
 				{ID: "bom-ame-coffee-001", ProductID: "prod-americano-001", InventoryItemID: "inv-coffee-beans-001", QuantityRequired: 18},
 				{ID: "bom-ame-water-001", ProductID: "prod-americano-001", InventoryItemID: "inv-water-001", QuantityRequired: 200},
@@ -92,7 +92,7 @@ func seedProducts() {
 			},
 		},
 		{
-			product: models.Product{Base: models.Base{ID: "prod-latte-001"}, POSProductID: "pos-latte", Name: "Cafe Latte", SKU: "BEV-LATTE", IsActive: true},
+			product: models.Product{Base: models.Base{ID: "prod-latte-001"}, POSProductID: "pos-latte", Name: "Cafe Latte", SKU: "BEV-LATTE", Barcode: "8850001000023", IsActive: true},
 			bom: []models.ProductInventoryMapping{
 				{ID: "bom-lat-coffee-001", ProductID: "prod-latte-001", InventoryItemID: "inv-coffee-beans-001", QuantityRequired: 18},
 				{ID: "bom-lat-milk-001", ProductID: "prod-latte-001", InventoryItemID: "inv-milk-001", QuantityRequired: 200},
@@ -101,7 +101,7 @@ func seedProducts() {
 			},
 		},
 		{
-			product: models.Product{Base: models.Base{ID: "prod-cappuccino-001"}, POSProductID: "pos-cappuccino", Name: "Cappuccino", SKU: "BEV-CAPPUCCINO", IsActive: true},
+			product: models.Product{Base: models.Base{ID: "prod-cappuccino-001"}, POSProductID: "pos-cappuccino", Name: "Cappuccino", SKU: "BEV-CAPPUCCINO", Barcode: "8850001000030", IsActive: true},
 			bom: []models.ProductInventoryMapping{
 				{ID: "bom-cap-coffee-001", ProductID: "prod-cappuccino-001", InventoryItemID: "inv-coffee-beans-001", QuantityRequired: 18},
 				{ID: "bom-cap-milk-001", ProductID: "prod-cappuccino-001", InventoryItemID: "inv-milk-001", QuantityRequired: 120},
@@ -110,7 +110,7 @@ func seedProducts() {
 			},
 		},
 		{
-			product: models.Product{Base: models.Base{ID: "prod-espresso-001"}, POSProductID: "pos-espresso", Name: "Espresso", SKU: "BEV-ESPRESSO", IsActive: true},
+			product: models.Product{Base: models.Base{ID: "prod-espresso-001"}, POSProductID: "pos-espresso", Name: "Espresso", SKU: "BEV-ESPRESSO", Barcode: "8850001000047", IsActive: true},
 			bom: []models.ProductInventoryMapping{
 				{ID: "bom-esp-coffee-001", ProductID: "prod-espresso-001", InventoryItemID: "inv-coffee-beans-001", QuantityRequired: 18},
 				{ID: "bom-esp-water-001", ProductID: "prod-espresso-001", InventoryItemID: "inv-water-001", QuantityRequired: 30},
