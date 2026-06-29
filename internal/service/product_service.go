@@ -27,11 +27,20 @@ func GetProduct(id string) (*models.Product, error) {
 	return p, err
 }
 
-func CreateProduct(posProductID, name, sku string, isActive bool) (*models.Product, error) {
+func GetProductByBarcode(barcode string) (*models.Product, error) {
+	p, err := repository.GetProductByBarcode(barcode)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("product not found")
+	}
+	return p, err
+}
+
+func CreateProduct(posProductID, name, sku, barcode string, isActive bool) (*models.Product, error) {
 	p := &models.Product{
 		POSProductID: posProductID,
 		Name:         name,
 		SKU:          sku,
+		Barcode:      barcode,
 		IsActive:     isActive,
 	}
 	if err := repository.CreateProduct(p); err != nil {
@@ -40,7 +49,7 @@ func CreateProduct(posProductID, name, sku string, isActive bool) (*models.Produ
 	return p, nil
 }
 
-func UpdateProduct(id, posProductID, name, sku string, isActive bool) (*models.Product, error) {
+func UpdateProduct(id, posProductID, name, sku, barcode string, isActive bool) (*models.Product, error) {
 	p, err := repository.GetProductByID(id)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
@@ -51,6 +60,7 @@ func UpdateProduct(id, posProductID, name, sku string, isActive bool) (*models.P
 	p.POSProductID = posProductID
 	p.Name = name
 	p.SKU = sku
+	p.Barcode = barcode
 	p.IsActive = isActive
 	p.BOM = nil // don't overwrite BOM via Save
 	if err := repository.UpdateProduct(p); err != nil {

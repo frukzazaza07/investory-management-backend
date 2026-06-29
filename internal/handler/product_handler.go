@@ -47,10 +47,27 @@ func GetProduct(c fiber.Ctx) error {
 	return response.Success(c, "product retrieved", product)
 }
 
+// GetProductByBarcode godoc
+// @Summary      Get product by barcode
+// @Tags         products
+// @Security     BearerAuth
+// @Produce      json
+// @Param        barcode path string true "Barcode"
+// @Success      200 {object} response.Response
+// @Router       /api/v1/products/barcode/{barcode} [get]
+func GetProductByBarcode(c fiber.Ctx) error {
+	product, err := service.GetProductByBarcode(c.Params("barcode"))
+	if err != nil {
+		return response.NotFound(c, err.Error())
+	}
+	return response.Success(c, "product retrieved", product)
+}
+
 type productRequest struct {
 	POSProductID string `json:"pos_product_id"`
 	Name         string `json:"name"`
 	SKU          string `json:"sku"`
+	Barcode      string `json:"barcode"`
 	IsActive     bool   `json:"is_active"`
 }
 
@@ -71,7 +88,7 @@ func CreateProduct(c fiber.Ctx) error {
 	if req.POSProductID == "" || req.Name == "" {
 		return response.BadRequest(c, "pos_product_id and name are required")
 	}
-	product, err := service.CreateProduct(req.POSProductID, req.Name, req.SKU, req.IsActive)
+	product, err := service.CreateProduct(req.POSProductID, req.Name, req.SKU, req.Barcode, req.IsActive)
 	if err != nil {
 		return response.InternalError(c, err.Error())
 	}
@@ -93,7 +110,7 @@ func UpdateProduct(c fiber.Ctx) error {
 	if err := c.Bind().JSON(&req); err != nil {
 		return response.BadRequest(c, "invalid request body")
 	}
-	product, err := service.UpdateProduct(c.Params("id"), req.POSProductID, req.Name, req.SKU, req.IsActive)
+	product, err := service.UpdateProduct(c.Params("id"), req.POSProductID, req.Name, req.SKU, req.Barcode, req.IsActive)
 	if err != nil {
 		return response.NotFound(c, err.Error())
 	}

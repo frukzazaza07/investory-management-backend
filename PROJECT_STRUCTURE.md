@@ -13,7 +13,7 @@ investory-management-backend/
 │   │   ├── auth_handler.go            # Register, login
 │   │   ├── inventory_handler.go       # Inventory item CRUD + stock adjustment
 │   │   ├── pos_handler.go             # POS sale processing
-│   │   ├── product_handler.go         # Product CRUD + BOM management
+│   │   ├── product_handler.go         # Product CRUD + BOM management + barcode lookup
 │   │   ├── purchase_order_handler.go  # Purchase order lifecycle
 │   │   ├── supplier_handler.go        # Supplier CRUD
 │   │   └── webhook_handler.go         # Webhook registration + delivery
@@ -24,7 +24,7 @@ investory-management-backend/
 │   │   ├── base_model.go              # Shared GORM base (ID, timestamps, soft-delete)
 │   │   ├── inventory_item_model.go    # InventoryItem (warehouse stock record)
 │   │   ├── pos_sale_log_model.go      # PosSaleLog (idempotent sale record)
-│   │   ├── product_model.go           # Product + BOM associations
+│   │   ├── product_model.go           # Product (barcode, SKU, POS ID) + BOM associations
 │   │   ├── purchase_order_model.go    # PurchaseOrder + PurchaseOrderItem
 │   │   ├── stock_transaction_model.go # StockTransaction (audit ledger)
 │   │   ├── supplier_model.go          # Supplier

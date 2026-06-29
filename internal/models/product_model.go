@@ -10,6 +10,7 @@ type Product struct {
 	POSProductID string                    `gorm:"uniqueIndex;not null" json:"pos_product_id"`
 	Name         string                    `gorm:"not null" json:"name"`
 	SKU          string                    `json:"sku"`
+	Barcode      string                    `gorm:"uniqueIndex" json:"barcode"`
 	IsActive     bool                      `gorm:"not null;default:true" json:"is_active"`
 	BOM          []ProductInventoryMapping `gorm:"foreignKey:ProductID" json:"bom,omitempty"`
 }

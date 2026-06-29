@@ -360,14 +360,36 @@ GET    /api/v1/inventory/items/{id}/transactions
 ```
 GET    /api/v1/products?page=1&limit=20&search=latte
 POST   /api/v1/products
+GET    /api/v1/products/barcode/{barcode}    ← lookup by barcode scan
 GET    /api/v1/products/{id}
 PUT    /api/v1/products/{id}
 DELETE /api/v1/products/{id}
 GET    /api/v1/products/{id}/bom
-PUT    /api/v1/products/{id}/bom   ← full replace
+PUT    /api/v1/products/{id}/bom             ← full replace
 ```
 
 > **PUT /bom** เป็น full replace — ส่ง items ทั้งหมดที่ต้องการ ระบบจะลบของเก่าแล้วใส่ใหม่ทั้งหมด
+
+**Barcode lookup** — สแกนบาร์โค้ดสินค้าเพื่อดึงข้อมูล Product พร้อม BOM และ stock ปัจจุบัน:
+```http
+GET /api/v1/products/barcode/1234567890128
+Authorization: Bearer <token>
+```
+
+Response เหมือนกับ `GET /api/v1/products/{id}` ทุกประการ
+
+**สร้าง Product พร้อม barcode:**
+```json
+{
+  "pos_product_id": "pos-latte",
+  "name": "Cafe Latte",
+  "sku": "BEV-LATTE",
+  "barcode": "1234567890128",
+  "is_active": true
+}
+```
+
+> `barcode` เป็น optional และต้องไม่ซ้ำกันในระบบ (unique index)
 
 ---
 
@@ -582,6 +604,7 @@ POST            /api/v1/inventory/items/{id}/adjust
 GET             /api/v1/inventory/items/{id}/transactions
 
 GET/POST        /api/v1/products
+GET             /api/v1/products/barcode/{barcode}
 GET/PUT/DELETE  /api/v1/products/{id}
 GET/PUT         /api/v1/products/{id}/bom
 

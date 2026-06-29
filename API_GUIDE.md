@@ -239,6 +239,7 @@ type Product = {
   pos_product_id: string;
   name: string;
   sku: string;
+  barcode: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -255,6 +256,7 @@ type BOMItem = {
 |--------|------|-------|
 | GET | `/api/v1/products` | `?page=1&limit=20&search=` |
 | POST | `/api/v1/products` | body below |
+| GET | `/api/v1/products/barcode/:barcode` | lookup by barcode scan |
 | GET | `/api/v1/products/:id` | |
 | PUT | `/api/v1/products/:id` | same body as POST |
 | DELETE | `/api/v1/products/:id` | soft-delete |
@@ -267,8 +269,14 @@ await api.post("/api/v1/products", {
   pos_product_id: "POS-SKU-001",  // required — must match your POS system
   name: "Latte",                  // required
   sku: "LATTE-001",
+  barcode: "1234567890128",       // optional — used for barcode scanning
   is_active: true,
 });
+
+// Lookup by barcode (e.g. after scanning a product)
+const { data } = await api.get<ApiResponse<Product>>(
+  `/api/v1/products/barcode/1234567890128`
+);
 
 // Update BOM (full replace)
 await api.put(`/api/v1/products/${id}/bom`, {

@@ -40,6 +40,7 @@ func SetupRoutes(app *fiber.App) {
 	pos := app.Group("/api/v1/pos", middleware.POSAPIKey)
 	pos.Post("/stock/deduct", handler.DeductStock)
 	pos.Get("/stock/levels", handler.GetStockLevels)
+	pos.Get("/products/barcode/:barcode", handler.GetProductByBarcode)
 	pos.Get("/products/:pos_product_id/availability", handler.CheckProductAvailability)
 
 	// Protected API (JWT)
@@ -73,6 +74,7 @@ func SetupRoutes(app *fiber.App) {
 	products := api.Group("/v1/products")
 	products.Get("/", handler.ListProducts)
 	products.Post("/", handler.CreateProduct)
+	products.Get("/barcode/:barcode", handler.GetProductByBarcode)
 	products.Get("/:id", handler.GetProduct)
 	products.Put("/:id", handler.UpdateProduct)
 	products.Delete("/:id", handler.DeleteProduct)

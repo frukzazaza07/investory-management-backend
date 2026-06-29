@@ -86,7 +86,48 @@ GET {INVENTORY_BASE_URL}/api/v1/pos/products/{pos_product_id}/availability?quant
 }
 ```
 
-### 3. Deduct Stock
+### 3. Lookup Product by Barcode
+
+Called when a cashier scans a product barcode. Returns the product details including its BOM with current inventory quantities, so the POS can verify availability before adding to the order.
+
+> This endpoint uses **JWT Bearer auth**, not the API key. It is intended for the management dashboard or a POS terminal that has a manager session. For machine-to-machine POS flows, use the `availability` endpoint with the known `pos_product_id` instead.
+
+```
+GET {MANAGEMENT_BASE_URL}/api/v1/products/barcode/{barcode}
+Authorization: Bearer <JWT>
+```
+
+**Response `data`:**
+```json
+{
+  "id": "uuid",
+  "pos_product_id": "pos-latte",
+  "name": "Cafe Latte",
+  "sku": "BEV-LATTE",
+  "barcode": "1234567890128",
+  "is_active": true,
+  "bom": [
+    {
+      "inventory_item_id": "uuid",
+      "quantity_required": 18,
+      "inventory_item": {
+        "sku": "RAW-COFFEE-BEANS",
+        "name": "Coffee Beans",
+        "unit": "g",
+        "quantity_in_stock": 4946
+      }
+    }
+  ],
+  "created_at": "2026-06-28T00:00:00Z",
+  "updated_at": "2026-06-29T00:00:00Z"
+}
+```
+
+Returns `404` if no product with that barcode exists.
+
+---
+
+### 4. Deduct Stock
 
 Called after an order is confirmed. Idempotent — the Inventory system uses `pos_order_id` to prevent double-deduction.
 

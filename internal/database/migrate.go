@@ -51,6 +51,15 @@ func Migrate() {
 				)
 			},
 		},
+		{
+			ID: "20260629000001",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&models.Product{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropColumn(&models.Product{}, "barcode")
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

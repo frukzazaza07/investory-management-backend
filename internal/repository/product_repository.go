@@ -33,6 +33,12 @@ func GetProductByPOSID(posProductID string) (*models.Product, error) {
 	return &product, err
 }
 
+func GetProductByBarcode(barcode string) (*models.Product, error) {
+	var product models.Product
+	err := database.DB.Preload("BOM.InventoryItem").First(&product, "barcode = ?", barcode).Error
+	return &product, err
+}
+
 func CreateProduct(product *models.Product) error {
 	return database.DB.Create(product).Error
 }
