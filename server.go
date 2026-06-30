@@ -18,6 +18,7 @@ import (
 	"investory-management-backend/internal/router"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -30,6 +31,13 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:5173"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Authorization", "X-API-Key"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	}))
+
 	router.SetupRoutes(app)
 
 	port := os.Getenv("APP_PORT")
