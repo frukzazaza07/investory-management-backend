@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"investory-management-backend/internal/service"
+	"investory-management-backend/pkg/i18n"
 	"investory-management-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -24,22 +25,23 @@ type deductStockRequest struct {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/pos/stock/deduct [post]
 func DeductStock(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req deductStockRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request body")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
 	}
 	if req.POSOrderID == "" {
-		return response.BadRequest(c, "pos_order_id is required")
+		return response.BadRequest(c, i18n.T(lang, "err.pos_order_id_required"))
 	}
 	if len(req.Items) == 0 {
-		return response.BadRequest(c, "items are required")
+		return response.BadRequest(c, i18n.T(lang, "err.items_required"))
 	}
 
 	result, err := service.DeductStockForSale(req.POSOrderID, req.Items)
 	if err != nil {
 		return response.BadRequest(c, err.Error())
 	}
-	return response.Success(c, "stock deducted", result)
+	return response.Success(c, i18n.T(lang, "pos.stock_deducted"), result)
 }
 
 // GetStockLevels godoc
@@ -50,11 +52,12 @@ func DeductStock(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/pos/stock/levels [get]
 func GetStockLevels(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	levels, err := service.GetStockLevels()
 	if err != nil {
 		return response.InternalError(c, err.Error())
 	}
-	return response.Success(c, "stock levels retrieved", levels)
+	return response.Success(c, i18n.T(lang, "pos.stock_levels"), levels)
 }
 
 // CheckProductAvailability godoc
@@ -67,6 +70,7 @@ func GetStockLevels(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/pos/products/{pos_product_id}/availability [get]
 func CheckProductAvailability(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	posProductID := c.Params("pos_product_id")
 	qty := 1.0
 	if q := c.Query("quantity"); q != "" {
@@ -79,5 +83,5 @@ func CheckProductAvailability(c fiber.Ctx) error {
 	if err != nil {
 		return response.NotFound(c, err.Error())
 	}
-	return response.Success(c, "availability checked", avail)
+	return response.Success(c, i18n.T(lang, "pos.availability"), avail)
 }

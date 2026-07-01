@@ -15,6 +15,7 @@ import (
 
 	_ "investory-management-backend/docs"
 	"investory-management-backend/internal/database"
+	"investory-management-backend/internal/middleware"
 	"investory-management-backend/internal/router"
 
 	"github.com/gofiber/fiber/v3"
@@ -31,6 +32,8 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	app.Use(middleware.Language)
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"http://localhost:5173"},

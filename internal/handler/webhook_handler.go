@@ -2,6 +2,7 @@ package handler
 
 import (
 	"investory-management-backend/internal/service"
+	"investory-management-backend/pkg/i18n"
 	"investory-management-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -15,11 +16,12 @@ import (
 // @Success      200 {object} response.Response
 // @Router       /api/v1/webhooks [get]
 func ListWebhooks(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	subs, err := service.ListWebhooks()
 	if err != nil {
 		return response.InternalError(c, err.Error())
 	}
-	return response.Success(c, "webhooks retrieved", subs)
+	return response.Success(c, i18n.T(lang, "webhook.list"), subs)
 }
 
 // GetWebhook godoc
@@ -31,11 +33,12 @@ func ListWebhooks(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/webhooks/{id} [get]
 func GetWebhook(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	sub, err := service.GetWebhook(c.Params("id"))
 	if err != nil {
-		return response.NotFound(c, "webhook not found")
+		return response.NotFound(c, i18n.T(lang, "webhook.not_found"))
 	}
-	return response.Success(c, "webhook retrieved", sub)
+	return response.Success(c, i18n.T(lang, "webhook.get"), sub)
 }
 
 type webhookRequest struct {
@@ -56,12 +59,13 @@ type webhookRequest struct {
 // @Success      201 {object} response.Response
 // @Router       /api/v1/webhooks [post]
 func CreateWebhook(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req webhookRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request body")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
 	}
 	if req.Name == "" || req.URL == "" || req.Secret == "" {
-		return response.BadRequest(c, "name, url and secret are required")
+		return response.BadRequest(c, i18n.T(lang, "err.name_url_secret_required"))
 	}
 	if len(req.Events) == 0 {
 		req.Events = []string{"STOCK_UPDATED", "STOCK_LOW", "STOCK_OUT"}
@@ -70,7 +74,7 @@ func CreateWebhook(c fiber.Ctx) error {
 	if err != nil {
 		return response.InternalError(c, err.Error())
 	}
-	return response.Created(c, "webhook created", fiber.Map{
+	return response.Created(c, i18n.T(lang, "webhook.create"), fiber.Map{
 		"id":        sub.ID,
 		"name":      sub.Name,
 		"url":       sub.URL,
@@ -90,15 +94,16 @@ func CreateWebhook(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/webhooks/{id} [put]
 func UpdateWebhook(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req webhookRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request body")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
 	}
 	sub, err := service.UpdateWebhook(c.Params("id"), req.Name, req.URL, req.Secret, req.Events, req.IsActive)
 	if err != nil {
 		return response.NotFound(c, err.Error())
 	}
-	return response.Success(c, "webhook updated", sub)
+	return response.Success(c, i18n.T(lang, "webhook.update"), sub)
 }
 
 // DeleteWebhook godoc
@@ -110,10 +115,11 @@ func UpdateWebhook(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/webhooks/{id} [delete]
 func DeleteWebhook(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	if err := service.DeleteWebhook(c.Params("id")); err != nil {
 		return response.NotFound(c, err.Error())
 	}
-	return response.Success(c, "webhook deleted", nil)
+	return response.Success(c, i18n.T(lang, "webhook.delete"), nil)
 }
 
 // TestWebhook godoc
@@ -125,12 +131,13 @@ func DeleteWebhook(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/webhooks/{id}/test [post]
 func TestWebhook(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	err := service.TestWebhook(c.Params("id"))
 	if err != nil {
 		// Still return 200 — the test was attempted; caller can check delivery logs
 		return response.Success(c, "test delivery attempted (delivery failed: "+err.Error()+")", nil)
 	}
-	return response.Success(c, "test event sent", nil)
+	return response.Success(c, i18n.T(lang, "webhook.test_sent"), nil)
 }
 
 // GetWebhookLogs godoc
@@ -142,9 +149,10 @@ func TestWebhook(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/webhooks/{id}/logs [get]
 func GetWebhookLogs(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	logs, err := service.GetWebhookLogs(c.Params("id"))
 	if err != nil {
 		return response.InternalError(c, err.Error())
 	}
-	return response.Success(c, "webhook logs retrieved", logs)
+	return response.Success(c, i18n.T(lang, "webhook.logs"), logs)
 }

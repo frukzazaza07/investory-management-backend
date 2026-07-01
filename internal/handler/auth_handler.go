@@ -2,6 +2,7 @@ package handler
 
 import (
 	"investory-management-backend/internal/service"
+	"investory-management-backend/pkg/i18n"
 	"investory-management-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -23,14 +24,15 @@ type authRequest struct {
 // @Failure      500  {object}  response.Response
 // @Router       /auth/register [post]
 func Register(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req authRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_request"))
 	}
 	if err := service.Register(req.Email, req.Password); err != nil {
 		return response.InternalError(c, err.Error())
 	}
-	return response.Created(c, "registered successfully", nil)
+	return response.Created(c, i18n.T(lang, "auth.register_success"), nil)
 }
 
 // Login godoc
@@ -44,13 +46,14 @@ func Register(c fiber.Ctx) error {
 // @Failure      401  {object}  response.Response
 // @Router       /auth/login [post]
 func Login(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req authRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_request"))
 	}
 	token, err := service.Login(req.Email, req.Password)
 	if err != nil {
 		return response.Unauthorized(c, err.Error())
 	}
-	return response.Success(c, "login successfully", fiber.Map{"token": token})
+	return response.Success(c, i18n.T(lang, "auth.login_success"), fiber.Map{"token": token})
 }

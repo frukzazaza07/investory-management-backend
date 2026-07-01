@@ -6,6 +6,7 @@ import (
 
 	"investory-management-backend/internal/models"
 	"investory-management-backend/internal/service"
+	"investory-management-backend/pkg/i18n"
 	"investory-management-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -22,13 +23,14 @@ import (
 // @Success      200 {object} response.Response
 // @Router       /api/v1/purchase-orders [get]
 func ListPurchaseOrders(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit, _ := strconv.Atoi(c.Query("limit", "20"))
 	orders, total, err := service.ListPurchaseOrders(page, limit, c.Query("status"))
 	if err != nil {
 		return response.InternalError(c, err.Error())
 	}
-	return response.Success(c, "purchase orders retrieved", fiber.Map{
+	return response.Success(c, i18n.T(lang, "po.list"), fiber.Map{
 		"items": orders, "total": total, "page": page, "limit": limit,
 	})
 }
@@ -42,11 +44,12 @@ func ListPurchaseOrders(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/purchase-orders/{id} [get]
 func GetPurchaseOrder(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	po, err := service.GetPurchaseOrder(c.Params("id"))
 	if err != nil {
 		return response.NotFound(c, err.Error())
 	}
-	return response.Success(c, "purchase order retrieved", po)
+	return response.Success(c, i18n.T(lang, "po.get"), po)
 }
 
 type poItemRequest struct {
@@ -56,9 +59,9 @@ type poItemRequest struct {
 }
 
 type createPORequest struct {
-	SupplierID string         `json:"supplier_id"`
-	Notes      string         `json:"notes"`
-	ExpectedAt string         `json:"expected_at"` // RFC3339
+	SupplierID string          `json:"supplier_id"`
+	Notes      string          `json:"notes"`
+	ExpectedAt string          `json:"expected_at"` // RFC3339
 	Items      []poItemRequest `json:"items"`
 }
 
@@ -72,12 +75,13 @@ type createPORequest struct {
 // @Success      201 {object} response.Response
 // @Router       /api/v1/purchase-orders [post]
 func CreatePurchaseOrder(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req createPORequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request body")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
 	}
 	if req.SupplierID == "" {
-		return response.BadRequest(c, "supplier_id is required")
+		return response.BadRequest(c, i18n.T(lang, "err.supplier_id_required"))
 	}
 
 	input := service.CreatePOInput{
@@ -103,13 +107,13 @@ func CreatePurchaseOrder(c fiber.Ctx) error {
 	if err != nil {
 		return response.BadRequest(c, err.Error())
 	}
-	return response.Created(c, "purchase order created", po)
+	return response.Created(c, i18n.T(lang, "po.create"), po)
 }
 
 type updatePORequest struct {
-	Notes      string                      `json:"notes"`
-	Status     models.PurchaseOrderStatus  `json:"status"`
-	ExpectedAt string                      `json:"expected_at"`
+	Notes      string                     `json:"notes"`
+	Status     models.PurchaseOrderStatus `json:"status"`
+	ExpectedAt string                     `json:"expected_at"`
 }
 
 // UpdatePurchaseOrder godoc
@@ -123,9 +127,10 @@ type updatePORequest struct {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/purchase-orders/{id} [put]
 func UpdatePurchaseOrder(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req updatePORequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request body")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
 	}
 	var expectedAt *time.Time
 	if req.ExpectedAt != "" {
@@ -138,7 +143,7 @@ func UpdatePurchaseOrder(c fiber.Ctx) error {
 	if err != nil {
 		return response.BadRequest(c, err.Error())
 	}
-	return response.Success(c, "purchase order updated", po)
+	return response.Success(c, i18n.T(lang, "po.update"), po)
 }
 
 type receiveItemRequest struct {
@@ -157,17 +162,18 @@ type receivePORequest struct {
 // @Security     BearerAuth
 // @Accept       json
 // @Produce      json
-// @Param        id   path string          true "PO ID"
+// @Param        id   path string           true "PO ID"
 // @Param        body body receivePORequest true "Receive"
 // @Success      200 {object} response.Response
 // @Router       /api/v1/purchase-orders/{id}/receive [post]
 func ReceivePurchaseOrder(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	var req receivePORequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.BadRequest(c, "invalid request body")
+		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
 	}
 	if len(req.Items) == 0 {
-		return response.BadRequest(c, "items are required")
+		return response.BadRequest(c, i18n.T(lang, "err.items_required"))
 	}
 
 	receiveItems := make([]service.ReceivePOItemInput, len(req.Items))
@@ -182,7 +188,7 @@ func ReceivePurchaseOrder(c fiber.Ctx) error {
 	if err != nil {
 		return response.BadRequest(c, err.Error())
 	}
-	return response.Success(c, "goods received", po)
+	return response.Success(c, i18n.T(lang, "po.receive"), po)
 }
 
 // CancelPurchaseOrder godoc
@@ -194,9 +200,10 @@ func ReceivePurchaseOrder(c fiber.Ctx) error {
 // @Success      200 {object} response.Response
 // @Router       /api/v1/purchase-orders/{id}/cancel [post]
 func CancelPurchaseOrder(c fiber.Ctx) error {
+	lang := i18n.Lang(c)
 	po, err := service.CancelPurchaseOrder(c.Params("id"))
 	if err != nil {
 		return response.BadRequest(c, err.Error())
 	}
-	return response.Success(c, "purchase order cancelled", po)
+	return response.Success(c, i18n.T(lang, "po.cancel"), po)
 }
