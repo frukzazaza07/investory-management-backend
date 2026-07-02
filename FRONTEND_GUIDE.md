@@ -11,14 +11,15 @@ A practical guide for connecting a React + TypeScript frontend to this Inventory
 
 1. [Setup](#1-setup)
 2. [TypeScript Types](#2-typescript-types)
-3. [Authentication](#3-authentication)
-4. [Hooks — Suppliers](#4-hooks--suppliers)
-5. [Hooks — Inventory Items](#5-hooks--inventory-items)
-6. [Hooks — Products & Barcode Scan](#6-hooks--products--barcode-scan)
-7. [Hooks — Purchase Orders](#7-hooks--purchase-orders)
-8. [Hooks — Webhooks](#8-hooks--webhooks)
-9. [POS Hooks (API Key)](#9-pos-hooks-api-key)
-10. [Error Handling](#10-error-handling)
+3. [Language (i18n)](#3-language-i18n)
+4. [Authentication](#4-authentication)
+5. [Hooks — Suppliers](#5-hooks--suppliers)
+6. [Hooks — Inventory Items](#6-hooks--inventory-items)
+7. [Hooks — Products & Barcode Scan](#7-hooks--products--barcode-scan)
+8. [Hooks — Purchase Orders](#8-hooks--purchase-orders)
+9. [Hooks — Webhooks](#9-hooks--webhooks)
+10. [POS Hooks (API Key)](#10-pos-hooks-api-key)
+11. [Error Handling](#11-error-handling)
 
 ---
 
@@ -44,14 +45,19 @@ VITE_POS_API_KEY=your-pos-api-key-here
 // src/lib/api.ts
 import axios from "axios";
 
+const lang = localStorage.getItem("lang") ?? "en"; // "th" or "en"
+
 // Dashboard API — JWT auth
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: { "Accept-Language": lang },
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // Reflect language changes at runtime
+  config.headers["Accept-Language"] = localStorage.getItem("lang") ?? "en";
   return config;
 });
 
@@ -69,7 +75,10 @@ api.interceptors.response.use(
 // POS API — API Key auth
 export const posApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  headers: { "X-API-Key": import.meta.env.VITE_POS_API_KEY },
+  headers: {
+    "X-API-Key": import.meta.env.VITE_POS_API_KEY,
+    "Accept-Language": lang,
+  },
 });
 ```
 
@@ -214,7 +223,62 @@ export type WebhookLog = {
 
 ---
 
-## 3. Authentication
+## 3. Language (i18n)
+
+The API returns `message` fields in **Thai (th)** or **English (en)** based on the `Accept-Language` header. Supported languages:
+
+| Code | Language |
+|------|----------|
+| `en` | English (default) |
+| `th` | ภาษาไทย |
+
+### Language context + hook
+
+```ts
+// src/lib/lang.ts
+export type Lang = "en" | "th";
+
+export function getLang(): Lang {
+  return (localStorage.getItem("lang") as Lang) ?? "en";
+}
+
+export function setLang(lang: Lang) {
+  localStorage.setItem("lang", lang);
+  // Reload so the axios instance picks up the new header
+  window.location.reload();
+}
+```
+
+```tsx
+// src/components/LanguageSwitcher.tsx
+import { getLang, setLang } from "@/lib/lang";
+
+export function LanguageSwitcher() {
+  const current = getLang();
+  return (
+    <div>
+      <button
+        onClick={() => setLang("th")}
+        style={{ fontWeight: current === "th" ? "bold" : "normal" }}
+      >
+        ไทย
+      </button>
+      <button
+        onClick={() => setLang("en")}
+        style={{ fontWeight: current === "en" ? "bold" : "normal" }}
+      >
+        EN
+      </button>
+    </div>
+  );
+}
+```
+
+> **Note:** Only the `message` field in the response envelope is translated. `data` fields (product names, SKUs, etc.) are stored as-is in the database.
+
+---
+
+## 4. Authentication
 
 ```ts
 // src/hooks/useAuth.ts

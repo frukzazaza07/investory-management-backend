@@ -15,6 +15,29 @@ The POS Backend communicates with the Inventory system in two directions:
 
 ---
 
+## Language (i18n)
+
+All Inventory API endpoints support Thai and English via the `Accept-Language` header or `?lang=` query param. The `message` field in every response is translated accordingly.
+
+```
+Accept-Language: th   →  "ดึงข้อมูลสต็อกสำเร็จ"
+Accept-Language: en   →  "stock levels retrieved"
+```
+
+Set it once on your HTTP client:
+
+```ts
+const inventoryClient = axios.create({
+  baseURL: process.env.INVENTORY_BASE_URL,
+  headers: {
+    "X-API-Key": process.env.INVENTORY_API_KEY,
+    "Accept-Language": "th",   // or "en"
+  },
+});
+```
+
+---
+
 ## Environment Variables
 
 ```env

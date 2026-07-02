@@ -33,6 +33,29 @@ type Paginated<T> = {
 
 ---
 
+## Language (i18n)
+
+The API supports **Thai (th)** and **English (en)**. Response `message` fields are returned in the requested language.
+
+Specify language via header or query param — header takes effect globally, query param is per-request:
+
+```ts
+// Option A — Accept-Language header (recommended, set once on the axios instance)
+api.defaults.headers["Accept-Language"] = "th"; // or "en"
+
+// Option B — query param (per request)
+api.get("/api/v1/products?lang=th");
+```
+
+| Method | Value | Example |
+|--------|-------|---------|
+| Header | `Accept-Language: th` | `th`, `th-TH`, `en`, `en-US` |
+| Query param | `?lang=th` | `?lang=th` or `?lang=en` |
+
+Default language is **English** when no header or param is provided.
+
+---
+
 ## Authentication
 
 ### JWT — Dashboard routes

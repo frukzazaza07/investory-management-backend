@@ -8,11 +8,12 @@ Base URL: `http://<host>:3000`
 ## สารบัญ
 
 1. [Authentication](#1-authentication)
-2. [POS System Integration](#2-pos-system-integration)
-3. [Frontend / Management Integration](#3-frontend--management-integration)
-4. [Webhook (รับ event จาก Inventory)](#4-webhook-รับ-event-จาก-inventory)
-5. [Error Response Format](#5-error-response-format)
-6. [Quick Reference — All Endpoints](#6-quick-reference--all-endpoints)
+2. [Language / i18n](#2-language--i18n)
+3. [POS System Integration](#3-pos-system-integration)
+4. [Frontend / Management Integration](#4-frontend--management-integration)
+5. [Webhook (รับ event จาก Inventory)](#5-webhook-รับ-event-จาก-inventory)
+6. [Error Response Format](#6-error-response-format)
+7. [Quick Reference — All Endpoints](#7-quick-reference--all-endpoints)
 
 ---
 
@@ -69,9 +70,40 @@ GET /api/v1/pos/stock/levels?api_key=dev-pos-api-key-2026
 
 ---
 
-## 2. POS System Integration
+## 2. Language / i18n
 
-### 2.1 Flow ภาพรวม
+ระบบรองรับ **2 ภาษา**: ไทย (`th`) และ อังกฤษ (`en`)
+
+ฟิลด์ `message` ใน response envelope จะถูกแปลตามภาษาที่ระบุ (`data` ไม่ถูกแปล)
+
+### วิธีระบุภาษา
+
+| วิธี | ตัวอย่าง | หมายเหตุ |
+|------|----------|----------|
+| Header | `Accept-Language: th` | แนะนำ — ตั้งครั้งเดียวที่ axios instance |
+| Query param | `?lang=th` | ใช้ได้ทุก endpoint, แบบ per-request |
+
+```http
+GET /api/v1/products
+Accept-Language: th
+```
+
+ตอบกลับ:
+```json
+{
+  "status": "success",
+  "message": "ดึงข้อมูลสินค้าสำเร็จ",
+  "data": { "items": [...] }
+}
+```
+
+ค่าเริ่มต้นคือ **ภาษาอังกฤษ** เมื่อไม่ระบุ header หรือ query param
+
+---
+
+## 3. POS System Integration
+
+### 3.1 Flow ภาพรวม
 
 ```
 POS                          Inventory
@@ -90,7 +122,7 @@ POS                          Inventory
 
 ---
 
-### 2.2 ดูสต็อกคงเหลือ
+### 3.2 ดูสต็อกคงเหลือ
 
 ใช้เพื่อโหลดสต็อกทั้งหมดเมื่อ POS เปิดขึ้น หรือ sync เป็นระยะ
 
@@ -125,7 +157,7 @@ X-API-Key: <api-key>
 
 ---
 
-### 2.3 เช็กว่าสินค้าขายได้ไหม (ก่อนรับออเดอร์)
+### 3.3 เช็กว่าสินค้าขายได้ไหม (ก่อนรับออเดอร์)
 
 ```http
 GET /api/v1/pos/products/{pos_product_id}/availability?quantity=2
@@ -166,7 +198,7 @@ X-API-Key: <api-key>
 
 ---
 
-### 2.4 ตัดสต็อกหลังขาย (Idempotent)
+### 3.4 ตัดสต็อกหลังขาย (Idempotent)
 
 **สำคัญ:** ต้องส่ง `pos_order_id` ที่ unique ต่อออเดอร์เสมอ  
 ระบบจะ deduplicate — ถ้าส่งซ้ำ order เดิมจะ return `already_processed` ไม่ตัดสต็อกซ้ำ
@@ -226,7 +258,7 @@ Content-Type: application/json
 
 ---
 
-### 2.5 ผูก POS Product กับ Inventory
+### 3.5 ผูก POS Product กับ Inventory
 
 ก่อนที่ POS จะสามารถตัดสต็อกได้ ต้องมีการผูก `pos_product_id` กับ Inventory ผ่าน Management API:
 
@@ -264,11 +296,11 @@ Authorization: Bearer <token>
 
 ---
 
-## 3. Frontend / Management Integration
+## 4. Frontend / Management Integration
 
 ใช้ JWT token สำหรับทุก request ส่วนนี้
 
-### 3.1 Suppliers
+### 4.1 Suppliers
 
 ```
 GET    /api/v1/suppliers?page=1&limit=20&search=coffee
@@ -291,7 +323,7 @@ DELETE /api/v1/suppliers/{id}
 
 ---
 
-### 3.2 Inventory Items
+### 4.2 Inventory Items
 
 ```
 GET    /api/v1/inventory/items?page=1&limit=20&search=beans
@@ -355,7 +387,7 @@ GET    /api/v1/inventory/items/{id}/transactions
 
 ---
 
-### 3.3 Products & BOM
+### 4.3 Products & BOM
 
 ```
 GET    /api/v1/products?page=1&limit=20&search=latte
@@ -393,7 +425,7 @@ Response เหมือนกับ `GET /api/v1/products/{id}` ทุกปร
 
 ---
 
-### 3.4 Purchase Orders
+### 4.4 Purchase Orders
 
 ```
 GET    /api/v1/purchase-orders?status=DRAFT&page=1&limit=20
@@ -437,7 +469,7 @@ DRAFT → ORDERED → PARTIALLY_RECEIVED → RECEIVED
 
 ---
 
-### 3.5 Webhooks (จัดการ subscription)
+### 4.5 Webhooks (จัดการ subscription)
 
 ```
 GET    /api/v1/webhooks
@@ -462,7 +494,7 @@ GET    /api/v1/webhooks/{id}/logs
 
 ---
 
-## 4. Webhook (รับ event จาก Inventory)
+## 5. Webhook (รับ event จาก Inventory)
 
 เมื่อ stock เปลี่ยนแปลง ระบบจะ POST ไปยัง URL ที่ลงทะเบียนไว้
 
@@ -565,7 +597,7 @@ def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
 
 ---
 
-## 5. Error Response Format
+## 6. Error Response Format
 
 ทุก error response มีรูปแบบเดียวกัน:
 
@@ -585,7 +617,7 @@ def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
 
 ---
 
-## 6. Quick Reference — All Endpoints
+## 7. Quick Reference — All Endpoints
 
 ### Auth
 ```
