@@ -120,6 +120,7 @@ func TestStockLevel_Fields(t *testing.T) {
 		Unit:            "g",
 		QuantityInStock: 500,
 		MinQuantity:     100,
+		UnitCost:        0.5,
 		IsLow:           false,
 		IsOut:           false,
 	}
@@ -128,5 +129,49 @@ func TestStockLevel_Fields(t *testing.T) {
 	}
 	if sl.IsOut {
 		t.Error("should not be out of stock")
+	}
+	if sl.UnitCost != 0.5 {
+		t.Errorf("unexpected UnitCost: %v", sl.UnitCost)
+	}
+}
+
+func TestCostBreakdown_UnitAndTotalCost(t *testing.T) {
+	// product BOM: 18g coffee @0.5/g + 200ml milk @0.04/ml + 1 cup @2.5/piece
+	type bomEntry struct {
+		quantityRequired float64
+		unitCost         float64
+	}
+	bom := []bomEntry{
+		{18, 0.5},
+		{200, 0.04},
+		{1, 2.5},
+	}
+	var unitCost float64
+	for _, entry := range bom {
+		unitCost += entry.quantityRequired * entry.unitCost
+	}
+	quantity := 2.0
+	totalCost := unitCost * quantity
+
+	wantUnitCost := 18*0.5 + 200*0.04 + 1*2.5 // 9 + 8 + 2.5 = 19.5
+	if unitCost != wantUnitCost {
+		t.Errorf("unit_cost: want %v, got %v", wantUnitCost, unitCost)
+	}
+	if totalCost != wantUnitCost*2 {
+		t.Errorf("total_cost: want %v, got %v", wantUnitCost*2, totalCost)
+	}
+}
+
+func TestCostBreakdownItem_Fields(t *testing.T) {
+	item := service.CostBreakdownItem{
+		POSProductID: "pos-latte",
+		UnitCost:     22.5,
+		TotalCost:    45.0,
+	}
+	if item.POSProductID != "pos-latte" {
+		t.Errorf("unexpected POSProductID: %q", item.POSProductID)
+	}
+	if item.TotalCost != item.UnitCost*2 {
+		t.Errorf("total_cost should equal unit_cost * quantity: %v vs %v", item.TotalCost, item.UnitCost*2)
 	}
 }

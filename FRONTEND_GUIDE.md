@@ -892,6 +892,7 @@ type StockLevel = {
   unit: string;
   quantity_in_stock: number;
   min_quantity: number;
+  unit_cost: number;
   is_low: boolean;
   is_out: boolean;
 };
@@ -906,8 +907,31 @@ type AvailabilityResult = {
     name: string;
     required: number;
     available: number;
+    unit_cost: number;
     is_sufficient: boolean;
   }[];
+};
+
+type StockDeduction = {
+  inventory_item_id: string;
+  sku: string;
+  name: string;
+  quantity_deducted: number;
+  quantity_remaining: number;
+};
+
+type CostBreakdownItem = {
+  pos_product_id: string;
+  unit_cost: number;
+  total_cost: number;
+};
+
+type DeductStockResult = {
+  pos_order_id: string;
+  status: "processed" | "already_processed";
+  deductions: StockDeduction[];
+  /** One entry per distinct pos_product_id, present on every "processed" response (unit_cost may be 0 if a product has no BOM cost data yet). Omitted on "already_processed" replays — the cost was already applied to the original order. */
+  cost_breakdown?: CostBreakdownItem[];
 };
 
 export function useStockLevels() {
@@ -940,13 +964,49 @@ export function useProductAvailability(posProductId: string, quantity = 1) {
 export function useDeductStock() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: {
+    mutationFn: async (body: {
       pos_order_id: string;
       items: { pos_product_id: string; quantity: number }[];
-    }) => posApi.post("/api/v1/pos/stock/deduct", body),
+    }) => {
+      const { data } = await posApi.post<ApiResponse<DeductStockResult>>(
+        "/api/v1/pos/stock/deduct",
+        body
+      );
+      return data.data!;
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["pos", "stock-levels"] }),
   });
 }
+```
+
+### Using `cost_breakdown` to compute order cost/profit
+
+`cost_breakdown` is additive — keep sending orders exactly as before. When the
+array is present and non-empty, trust it over any locally-stored `cost_price`
+(a `0` `total_cost` for a given product means Inventory genuinely has no BOM
+cost data for it yet — that's still authoritative, not a signal to fall
+back). Only fall back to POS's own `cost_price` when the array itself is
+missing or empty, e.g. on an `already_processed` replay.
+
+```ts
+const deductStock = useDeductStock();
+
+const result = await deductStock.mutateAsync({
+  pos_order_id: orderId,
+  items: cart.map((i) => ({ pos_product_id: i.posProductId, quantity: i.qty })),
+});
+
+const costByProduct = new Map(
+  result.cost_breakdown?.map((c) => [c.pos_product_id, c]) ?? []
+);
+
+const orderCost = cart.reduce((sum, item) => {
+  const fromInventory = costByProduct.get(item.posProductId)?.total_cost;
+  const fallback = item.costPrice * item.qty; // POS's own manual cost_price
+  return sum + (fromInventory ?? fallback);
+}, 0);
+
+const profit = orderTotal - orderCost;
 ```
 
 ---

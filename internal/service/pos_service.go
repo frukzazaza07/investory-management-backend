@@ -18,9 +18,10 @@ type POSSaleItem struct {
 }
 
 type DeductResult struct {
-	POSOrderID string            `json:"pos_order_id"`
-	Status     string            `json:"status"`
-	Deductions []StockDeduction  `json:"deductions"`
+	POSOrderID    string              `json:"pos_order_id"`
+	Status        string              `json:"status"`
+	Deductions    []StockDeduction    `json:"deductions"`
+	CostBreakdown []CostBreakdownItem `json:"cost_breakdown,omitempty"`
 }
 
 type StockDeduction struct {
@@ -29,6 +30,12 @@ type StockDeduction struct {
 	Name              string  `json:"name"`
 	QuantityDeducted  float64 `json:"quantity_deducted"`
 	QuantityRemaining float64 `json:"quantity_remaining"`
+}
+
+type CostBreakdownItem struct {
+	POSProductID string  `json:"pos_product_id"`
+	UnitCost     float64 `json:"unit_cost"`
+	TotalCost    float64 `json:"total_cost"`
 }
 
 func DeductStockForSale(posOrderID string, items []POSSaleItem) (*DeductResult, error) {
@@ -65,6 +72,10 @@ func DeductStockForSale(posOrderID string, items []POSSaleItem) (*DeductResult, 
 	}
 	deductionMap := map[string]float64{}
 
+	productCache := map[string]*models.Product{}
+	qtyByProduct := map[string]float64{}
+	var productOrder []string
+
 	for _, saleItem := range items {
 		product, err := repository.GetProductByPOSID(saleItem.POSProductID)
 		if err != nil {
@@ -74,6 +85,12 @@ func DeductStockForSale(posOrderID string, items []POSSaleItem) (*DeductResult, 
 			repository.UpdatePosSaleLog(saleLog)
 			return nil, errors.New(errMsg)
 		}
+
+		if _, seen := qtyByProduct[saleItem.POSProductID]; !seen {
+			productOrder = append(productOrder, saleItem.POSProductID)
+			productCache[saleItem.POSProductID] = product
+		}
+		qtyByProduct[saleItem.POSProductID] += saleItem.Quantity
 
 		for _, bom := range product.BOM {
 			needed := bom.QuantityRequired * saleItem.Quantity
@@ -121,6 +138,22 @@ func DeductStockForSale(posOrderID string, items []POSSaleItem) (*DeductResult, 
 	saleLog.ProcessedAt = &now
 	repository.UpdatePosSaleLog(saleLog)
 
+	var costBreakdown []CostBreakdownItem
+	for _, posProductID := range productOrder {
+		product := productCache[posProductID]
+		var unitCost float64
+		for _, bom := range product.BOM {
+			if bom.InventoryItem != nil {
+				unitCost += bom.QuantityRequired * bom.InventoryItem.CostPerUnit
+			}
+		}
+		costBreakdown = append(costBreakdown, CostBreakdownItem{
+			POSProductID: posProductID,
+			UnitCost:     unitCost,
+			TotalCost:    unitCost * qtyByProduct[posProductID],
+		})
+	}
+
 	// Fire webhooks & check stock alerts
 	for _, item := range updatedItems {
 		event := "STOCK_UPDATED"
@@ -133,9 +166,10 @@ func DeductStockForSale(posOrderID string, items []POSSaleItem) (*DeductResult, 
 	}
 
 	return &DeductResult{
-		POSOrderID: posOrderID,
-		Status:     "processed",
-		Deductions: deductions,
+		POSOrderID:    posOrderID,
+		Status:        "processed",
+		Deductions:    deductions,
+		CostBreakdown: costBreakdown,
 	}, nil
 }
 
@@ -146,6 +180,7 @@ type StockLevel struct {
 	Unit            string  `json:"unit"`
 	QuantityInStock float64 `json:"quantity_in_stock"`
 	MinQuantity     float64 `json:"min_quantity"`
+	UnitCost        float64 `json:"unit_cost"`
 	IsLow           bool    `json:"is_low"`
 	IsOut           bool    `json:"is_out"`
 }
@@ -165,6 +200,7 @@ func GetStockLevels() ([]StockLevel, error) {
 			Unit:            item.Unit,
 			QuantityInStock: item.QuantityInStock,
 			MinQuantity:     item.MinQuantity,
+			UnitCost:        item.CostPerUnit,
 			IsLow:           item.MinQuantity > 0 && item.QuantityInStock <= item.MinQuantity,
 			IsOut:           item.QuantityInStock <= 0,
 		}
@@ -180,12 +216,13 @@ type ProductAvailability struct {
 }
 
 type AvailabilityDetail struct {
-	InventoryItemID  string  `json:"inventory_item_id"`
-	SKU              string  `json:"sku"`
-	Name             string  `json:"name"`
-	Required         float64 `json:"required"`
-	Available        float64 `json:"available"`
-	IsSufficient     bool    `json:"is_sufficient"`
+	InventoryItemID string  `json:"inventory_item_id"`
+	SKU             string  `json:"sku"`
+	Name            string  `json:"name"`
+	Required        float64 `json:"required"`
+	Available       float64 `json:"available"`
+	UnitCost        float64 `json:"unit_cost"`
+	IsSufficient    bool    `json:"is_sufficient"`
 }
 
 func CheckProductAvailability(posProductID string, quantity float64) (*ProductAvailability, error) {
@@ -222,6 +259,7 @@ func CheckProductAvailability(posProductID string, quantity float64) (*ProductAv
 			Name:            item.Name,
 			Required:        required,
 			Available:       item.QuantityInStock,
+			UnitCost:        item.CostPerUnit,
 			IsSufficient:    sufficient,
 		})
 	}
