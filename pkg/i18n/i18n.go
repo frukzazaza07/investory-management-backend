@@ -39,12 +39,12 @@ var messages = map[string]map[string]string{
 	"product.bom_update": {EN: "BOM updated", TH: "อัปเดตสูตรสำเร็จ"},
 
 	// Purchase Orders
-	"po.list":   {EN: "purchase orders retrieved", TH: "ดึงข้อมูลใบสั่งซื้อสำเร็จ"},
-	"po.get":    {EN: "purchase order retrieved", TH: "ดึงข้อมูลใบสั่งซื้อสำเร็จ"},
-	"po.create": {EN: "purchase order created", TH: "สร้างใบสั่งซื้อสำเร็จ"},
-	"po.update": {EN: "purchase order updated", TH: "อัปเดตใบสั่งซื้อสำเร็จ"},
+	"po.list":    {EN: "purchase orders retrieved", TH: "ดึงข้อมูลใบสั่งซื้อสำเร็จ"},
+	"po.get":     {EN: "purchase order retrieved", TH: "ดึงข้อมูลใบสั่งซื้อสำเร็จ"},
+	"po.create":  {EN: "purchase order created", TH: "สร้างใบสั่งซื้อสำเร็จ"},
+	"po.update":  {EN: "purchase order updated", TH: "อัปเดตใบสั่งซื้อสำเร็จ"},
 	"po.receive": {EN: "goods received", TH: "รับสินค้าสำเร็จ"},
-	"po.cancel": {EN: "purchase order cancelled", TH: "ยกเลิกใบสั่งซื้อสำเร็จ"},
+	"po.cancel":  {EN: "purchase order cancelled", TH: "ยกเลิกใบสั่งซื้อสำเร็จ"},
 
 	// Webhooks
 	"webhook.list":      {EN: "webhooks retrieved", TH: "ดึงข้อมูล webhook สำเร็จ"},
@@ -62,16 +62,41 @@ var messages = map[string]map[string]string{
 	"pos.availability":   {EN: "availability checked", TH: "ตรวจสอบความพร้อมขายสำเร็จ"},
 
 	// Validation errors
-	"err.invalid_body":               {EN: "invalid request body", TH: "รูปแบบคำขอไม่ถูกต้อง"},
-	"err.invalid_request":            {EN: "invalid request", TH: "คำขอไม่ถูกต้อง"},
-	"err.name_required":              {EN: "name is required", TH: "กรุณาระบุชื่อ"},
-	"err.sku_name_unit_required":     {EN: "sku, name and unit are required", TH: "กรุณาระบุ SKU ชื่อ และหน่วย"},
+	"err.invalid_body":                 {EN: "invalid request body", TH: "รูปแบบคำขอไม่ถูกต้อง"},
+	"err.invalid_request":              {EN: "invalid request", TH: "คำขอไม่ถูกต้อง"},
+	"err.name_required":                {EN: "name is required", TH: "กรุณาระบุชื่อ"},
+	"err.sku_name_unit_required":       {EN: "sku, name and unit are required", TH: "กรุณาระบุ SKU ชื่อ และหน่วย"},
 	"err.pos_product_id_name_required": {EN: "pos_product_id and name are required", TH: "กรุณาระบุ pos_product_id และชื่อ"},
-	"err.supplier_id_required":       {EN: "supplier_id is required", TH: "กรุณาระบุ supplier_id"},
-	"err.items_required":             {EN: "items are required", TH: "กรุณาระบุรายการสินค้า"},
-	"err.name_url_secret_required":   {EN: "name, url and secret are required", TH: "กรุณาระบุชื่อ URL และ secret"},
-	"err.pos_order_id_required":      {EN: "pos_order_id is required", TH: "กรุณาระบุ pos_order_id"},
-	"err.quantity_positive":          {EN: "quantity must be greater than 0", TH: "จำนวนต้องมากกว่า 0"},
+	"err.supplier_id_required":         {EN: "supplier_id is required", TH: "กรุณาระบุ supplier_id"},
+	"err.items_required":               {EN: "items are required", TH: "กรุณาระบุรายการสินค้า"},
+	"err.name_url_secret_required":     {EN: "name, url and secret are required", TH: "กรุณาระบุชื่อ URL และ secret"},
+	"err.pos_order_id_required":        {EN: "pos_order_id is required", TH: "กรุณาระบุ pos_order_id"},
+	"err.quantity_positive":            {EN: "quantity must be greater than 0", TH: "จำนวนต้องมากกว่า 0"},
+
+	// Api messages
+	"api.success":                  {EN: "success", TH: "สำเร็จ"},
+	"api.error":                    {EN: "error", TH: "เกิดข้อผิดพลาด"},
+	"api.not_found":                {EN: "not found", TH: "ไม่พบข้อมูล"},
+	"api.invalid_request":          {EN: "invalid request", TH: "คำขอไม่ถูกต้อง"},
+	"api.unauthorized":             {EN: "unauthorized", TH: "ไม่ได้รับอนุญาต"},
+	"api.forbidden":                {EN: "forbidden", TH: "ห้ามเข้าถึง"},
+	"api.internal_error":           {EN: "internal server error", TH: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์"},
+	"api.validation_error":         {EN: "validation error", TH: "เกิดข้อผิดพลาดในการตรวจสอบข้อมูล"},
+	"api.database_error":           {EN: "database error", TH: "เกิดข้อผิดพลาดในการเข้าถึงฐานข้อมูล"},
+	"api.external_service_error":   {EN: "external service error", TH: "เกิดข้อผิดพลาดจากบริการภายนอก"},
+	"api.rate_limit_exceeded":      {EN: "rate limit exceeded", TH: "เกินขีดจำกัดการใช้งาน"},
+	"api.service_unavailable":      {EN: "service unavailable", TH: "บริการไม่พร้อมใช้งาน"},
+	"api.timeout":                  {EN: "request timeout", TH: "หมดเวลาการร้องขอ"},
+	"api.conflict":                 {EN: "conflict", TH: "เกิดความขัดแย้ง"},
+	"api.not_implemented":          {EN: "not implemented", TH: "ยังไม่ได้ดำเนินการ"},
+	"api.bad_gateway":              {EN: "bad gateway", TH: "เกตเวย์ไม่ถูกต้อง"},
+	"api.gateway_timeout":          {EN: "gateway timeout", TH: "หมดเวลาการเชื่อมต่อเกตเวย์"},
+	"api.unsupported_media_type":   {EN: "unsupported media type", TH: "ประเภทสื่อไม่รองรับ"},
+	"api.too_many_requests":        {EN: "too many requests", TH: "คำขอมากเกินไป"},
+	"api.precondition_failed":      {EN: "precondition failed", TH: "เงื่อนไขล่วงหน้าไม่สำเร็จ"},
+	"api.payload_too_large":        {EN: "payload too large", TH: "ข้อมูลมากเกินไป"},
+	"api.uri_too_long":             {EN: "URI too long", TH: "URI ยาวเกินไป"},
+	"api.unsupported_http_version": {EN: "unsupported HTTP version", TH: "เวอร์ชัน HTTP ไม่รองรับ"},
 }
 
 // T returns the translated message for the given language, falling back to EN.

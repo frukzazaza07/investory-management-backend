@@ -3,6 +3,8 @@ package router
 import (
 	"investory-management-backend/internal/handler"
 	"investory-management-backend/internal/middleware"
+	"investory-management-backend/pkg/i18n"
+	"investory-management-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/swaggo/swag"
@@ -46,10 +48,14 @@ func SetupRoutes(app *fiber.App) {
 	// Protected API (JWT)
 	api := app.Group("/api", middleware.Protected)
 	api.Get("/me", func(c fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"user_id": c.Locals("userID"),
-			"email":   c.Locals("email"),
-		})
+		lang := i18n.Lang(c)
+		return response.Success(
+			c,
+			i18n.T(lang, "api.success"),
+			fiber.Map{
+				"user_id": c.Locals("userID"),
+				"email":   c.Locals("email"),
+			})
 	})
 
 	// Suppliers
