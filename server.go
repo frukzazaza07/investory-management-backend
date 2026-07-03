@@ -48,5 +48,14 @@ func main() {
 		port = "8080"
 	}
 
-	log.Fatal(app.Listen(":" + port))
+	certFile := os.Getenv("TLS_CERT")
+	keyFile := os.Getenv("TLS_KEY")
+
+	if certFile != "" && keyFile != "" {
+		log.Printf("listening on https://localhost:%s", port)
+		log.Fatal(app.Listen(":"+port, fiber.ListenConfig{CertFile: certFile, CertKeyFile: keyFile}))
+	} else {
+		log.Printf("listening on http://localhost:%s", port)
+		log.Fatal(app.Listen(":" + port))
+	}
 }

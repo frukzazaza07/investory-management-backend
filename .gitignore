@@ -20,3 +20,6 @@ server
 
 # Claude Code local config
 .claude/
+
+# TLS (mkcert)
+*.pem
