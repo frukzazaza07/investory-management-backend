@@ -28,6 +28,11 @@ var messages = map[string]map[string]string{
 	"inventory.delete":       {EN: "inventory item deleted", TH: "ลบสินค้าคงคลังสำเร็จ"},
 	"inventory.adjust":       {EN: "stock adjusted", TH: "ปรับสต็อกสำเร็จ"},
 	"inventory.transactions": {EN: "transactions retrieved", TH: "ดึงประวัติธุรกรรมสำเร็จ"},
+	"inventory.unit.list":    {EN: "units retrieved", TH: "ดึงข้อมูลหน่วยสำเร็จ"},
+	"inventory.unit.get":     {EN: "unit retrieved", TH: "ดึงข้อมูลหน่วยสำเร็จ"},
+	"inventory.unit.create":  {EN: "unit created", TH: "สร้างหน่วยสำเร็จ"},
+	"inventory.unit.update":  {EN: "unit updated", TH: "อัปเดตหน่วยสำเร็จ"},
+	"inventory.unit.delete":  {EN: "unit deleted", TH: "ลบหน่วยสำเร็จ"},
 
 	// Products
 	"product.list":       {EN: "products retrieved", TH: "ดึงข้อมูลสินค้าสำเร็จ"},
@@ -66,6 +71,8 @@ var messages = map[string]map[string]string{
 	"err.invalid_request":              {EN: "invalid request", TH: "คำขอไม่ถูกต้อง"},
 	"err.name_required":                {EN: "name is required", TH: "กรุณาระบุชื่อ"},
 	"err.sku_name_unit_required":       {EN: "sku, name and unit are required", TH: "กรุณาระบุ SKU ชื่อ และหน่วย"},
+	"err.unit_invalid":                 {EN: "unit is invalid, see /api/v1/inventory/units for allowed values", TH: "หน่วยไม่ถูกต้อง ดูรายการที่ /api/v1/inventory/units"},
+	"err.unit_code_name_required":      {EN: "code and name are required", TH: "กรุณาระบุ code และชื่อ"},
 	"err.pos_product_id_name_required": {EN: "pos_product_id and name are required", TH: "กรุณาระบุ pos_product_id และชื่อ"},
 	"err.supplier_id_required":         {EN: "supplier_id is required", TH: "กรุณาระบุ supplier_id"},
 	"err.items_required":               {EN: "items are required", TH: "กรุณาระบุรายการสินค้า"},

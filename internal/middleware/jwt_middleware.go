@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"investory-management-backend/internal/models"
 	"investory-management-backend/internal/service"
 
 	"github.com/gofiber/fiber/v3"
@@ -29,6 +30,14 @@ func Protected(c fiber.Ctx) error {
 	claims := token.Claims.(*service.Claims)
 	c.Locals("userID", claims.UserID)
 	c.Locals("email", claims.Email)
+	c.Locals("role", claims.Role)
 
+	return c.Next()
+}
+
+func AdminOnly(c fiber.Ctx) error {
+	if c.Locals("role") != models.RoleAdmin {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "admin access required"})
+	}
 	return c.Next()
 }

@@ -55,6 +55,7 @@ func SetupRoutes(app *fiber.App) {
 			fiber.Map{
 				"user_id": c.Locals("userID"),
 				"email":   c.Locals("email"),
+				"role":    c.Locals("role"),
 			})
 	})
 
@@ -65,6 +66,14 @@ func SetupRoutes(app *fiber.App) {
 	suppliers.Get("/:id", handler.GetSupplier)
 	suppliers.Put("/:id", handler.UpdateSupplier)
 	suppliers.Delete("/:id", handler.DeleteSupplier)
+
+	// Inventory Units
+	units := api.Group("/v1/inventory/units")
+	units.Get("/", handler.ListInventoryUnits)
+	units.Get("/:id", handler.GetInventoryUnit)
+	units.Post("/", middleware.AdminOnly, handler.CreateInventoryUnit)
+	units.Put("/:id", middleware.AdminOnly, handler.UpdateInventoryUnit)
+	units.Delete("/:id", middleware.AdminOnly, handler.DeleteInventoryUnit)
 
 	// Inventory Items
 	inventory := api.Group("/v1/inventory/items")

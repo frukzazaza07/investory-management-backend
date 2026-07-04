@@ -77,6 +77,9 @@ func CreateInventoryItem(c fiber.Ctx) error {
 	if req.SKU == "" || req.Name == "" || req.Unit == "" {
 		return response.BadRequest(c, i18n.T(lang, "err.sku_name_unit_required"))
 	}
+	if !service.IsValidUnitCode(req.Unit) {
+		return response.BadRequest(c, i18n.T(lang, "err.unit_invalid"))
+	}
 	item, err := service.CreateInventoryItem(req.SKU, req.Name, req.Description, req.Unit, req.MinQuantity, req.CostPerUnit)
 	if err != nil {
 		return response.InternalError(c, err.Error())
@@ -99,6 +102,9 @@ func UpdateInventoryItem(c fiber.Ctx) error {
 	var req inventoryItemRequest
 	if err := c.Bind().JSON(&req); err != nil {
 		return response.BadRequest(c, i18n.T(lang, "err.invalid_body"))
+	}
+	if !service.IsValidUnitCode(req.Unit) {
+		return response.BadRequest(c, i18n.T(lang, "err.unit_invalid"))
 	}
 	item, err := service.UpdateInventoryItem(c.Params("id"), req.SKU, req.Name, req.Description, req.Unit, req.MinQuantity, req.CostPerUnit)
 	if err != nil {

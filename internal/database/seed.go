@@ -11,6 +11,7 @@ import (
 func Seed() {
 	seedUsers()
 	seedSuppliers()
+	seedInventoryUnits()
 	seedInventoryItems()
 	seedProducts()
 	log.Println("Seeding completed")
@@ -21,14 +22,18 @@ func seedUsers() {
 		Email    string
 		Password string
 		Status   string
+		Role     string
 	}{
-		{"admin@example.com", "admin123", "active"},
-		{"user@example.com", "user123", "active"},
+		{"admin@example.com", "admin123", "active", models.RoleAdmin},
+		{"user@example.com", "user123", "active", models.RoleStaff},
 	}
 
 	for _, u := range users {
 		var existing models.User
 		if err := DB.Where("email = ?", u.Email).First(&existing).Error; err == nil {
+			if existing.Role != u.Role {
+				DB.Model(&existing).Update("role", u.Role)
+			}
 			continue
 		}
 		hashed, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
@@ -36,9 +41,31 @@ func seedUsers() {
 			log.Printf("Failed to hash password for %s: %v", u.Email, err)
 			continue
 		}
-		user := models.User{Email: u.Email, Password: string(hashed), Status: u.Status}
+		user := models.User{Email: u.Email, Password: string(hashed), Status: u.Status, Role: u.Role}
 		if err := DB.Create(&user).Error; err != nil {
 			log.Printf("Failed to seed user %s: %v", u.Email, err)
+		}
+	}
+}
+
+func seedInventoryUnits() {
+	units := []models.InventoryUnit{
+		{Base: models.Base{ID: "unit-g"}, Code: "g", Name: "Gram"},
+		{Base: models.Base{ID: "unit-kg"}, Code: "kg", Name: "Kilogram"},
+		{Base: models.Base{ID: "unit-ml"}, Code: "ml", Name: "Milliliter"},
+		{Base: models.Base{ID: "unit-l"}, Code: "l", Name: "Liter"},
+		{Base: models.Base{ID: "unit-piece"}, Code: "piece", Name: "Piece"},
+		{Base: models.Base{ID: "unit-pack"}, Code: "pack", Name: "Pack"},
+		{Base: models.Base{ID: "unit-box"}, Code: "box", Name: "Box"},
+		{Base: models.Base{ID: "unit-bottle"}, Code: "bottle", Name: "Bottle"},
+	}
+	for _, u := range units {
+		var existing models.InventoryUnit
+		if DB.Where("id = ?", u.ID).First(&existing).Error == nil {
+			continue
+		}
+		if err := DB.Create(&u).Error; err != nil {
+			log.Printf("Failed to seed inventory unit %s: %v", u.Code, err)
 		}
 	}
 }

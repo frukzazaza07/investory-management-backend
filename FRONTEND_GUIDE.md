@@ -130,12 +130,22 @@ export type Supplier = {
   updated_at: string;
 };
 
+// Units are admin-managed (CRUD via /api/v1/inventory/units), not a fixed
+// union — fetch the current list with useInventoryUnits() rather than hardcoding it.
+export type InventoryUnit = {
+  id: string;
+  code: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type InventoryItem = {
   id: string;
   sku: string;
   name: string;
   description: string;
-  unit: string;
+  unit: string; // an InventoryUnit.code
   quantity_in_stock: number;
   min_quantity: number;
   cost_per_unit: number;
@@ -312,12 +322,19 @@ export function useMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      const { data } = await api.get<ApiResponse<{ user_id: number; email: string }>>(
-        "/api/me"
-      );
+      const { data } = await api.get<
+        ApiResponse<{ user_id: number; email: string; role: "admin" | "staff" }>
+      >("/api/me");
       return data.data!;
     },
   });
+}
+
+// Gate admin-only UI (e.g. the unit management screen) on this.
+// The API also enforces it server-side — this is UX only, not a security boundary.
+export function useIsAdmin() {
+  const { data } = useMe();
+  return data?.role === "admin";
 }
 
 export function logout() {
@@ -410,13 +427,55 @@ export function useDeleteSupplier() {
 // src/hooks/useInventory.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { ApiResponse, Paginated, InventoryItem, StockTransaction } from "@/types";
+import type { ApiResponse, Paginated, InventoryItem, InventoryUnit, StockTransaction } from "@/types";
 
 const KEYS = {
   list: (page: number, search: string) => ["inventory", page, search],
   detail: (id: string) => ["inventory", id],
   transactions: (id: string, page: number) => ["inventory", id, "transactions", page],
+  units: ["inventory", "units"],
 };
+
+// Units for the item form's <select> — GET /api/v1/inventory/units.
+// Admin-managed but changes rarely, so cache it for the session.
+export function useInventoryUnits() {
+  return useQuery({
+    queryKey: KEYS.units,
+    queryFn: async () => {
+      const { data } = await api.get<ApiResponse<InventoryUnit[]>>("/api/v1/inventory/units");
+      return data.data!;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Admin-only — server returns 403 for non-admins (see useIsAdmin in useAuth.ts).
+export function useCreateInventoryUnit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { code: string; name: string }) =>
+      api.post<ApiResponse<InventoryUnit>>("/api/v1/inventory/units", body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.units }),
+  });
+}
+
+export function useUpdateInventoryUnit(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { code: string; name: string }) =>
+      api.put<ApiResponse<InventoryUnit>>(`/api/v1/inventory/units/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.units }),
+  });
+}
+
+// Fails with 400 if the unit is still referenced by an inventory item.
+export function useDeleteInventoryUnit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/v1/inventory/units/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.units }),
+  });
+}
 
 export function useInventoryItems(page = 1, search = "") {
   return useQuery({
@@ -510,6 +569,51 @@ export function useDeleteInventoryItem() {
     mutationFn: (id: string) => api.delete(`/api/v1/inventory/items/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["inventory"] }),
   });
+}
+```
+
+### Unit select in the item form
+
+```tsx
+function UnitSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { data: units, isLoading } = useInventoryUnits();
+
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} disabled={isLoading}>
+      <option value="" disabled>Select unit</option>
+      {units?.map((u) => (
+        <option key={u.id} value={u.code}>{u.name} ({u.code})</option>
+      ))}
+    </select>
+  );
+}
+```
+
+`POST`/`PUT /api/v1/inventory/items` sends `unit` as the unit's `code` (e.g. `"kg"`, not the ID), and rejects any code not in the current list with a 400 (`err.unit_invalid`) — always populate the field from `useInventoryUnits()` rather than a free-text input.
+
+### Admin unit management screen
+
+Units are CRUD-managed by admins only — `POST`/`PUT`/`DELETE /api/v1/inventory/units` return 403 for non-admin users (checked via the `role` claim on the JWT, exposed at `/api/me`). Gate the screen client-side with `useIsAdmin()`, but remember the server enforces this independently:
+
+```tsx
+function UnitManagementPage() {
+  const isAdmin = useIsAdmin();
+  const { data: units } = useInventoryUnits();
+  const createUnit = useCreateInventoryUnit();
+  const deleteUnit = useDeleteInventoryUnit();
+
+  if (!isAdmin) return <p>Admins only.</p>;
+
+  return (
+    <ul>
+      {units?.map((u) => (
+        <li key={u.id}>
+          {u.name} ({u.code})
+          <button onClick={() => deleteUnit.mutate(u.id)}>Delete</button>
+        </li>
+      ))}
+    </ul>
+  );
 }
 ```
 

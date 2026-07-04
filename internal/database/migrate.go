@@ -60,6 +60,24 @@ func Migrate() {
 				return tx.Migrator().DropColumn(&models.Product{}, "barcode")
 			},
 		},
+		{
+			ID: "20260705000001",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&models.User{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropColumn(&models.User{}, "role")
+			},
+		},
+		{
+			ID: "20260705000002",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&models.InventoryUnit{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable(&models.InventoryUnit{})
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
