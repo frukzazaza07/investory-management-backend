@@ -102,11 +102,11 @@ func FireWebhookEvent(event string, item *models.InventoryItem) {
 		}
 		if item != nil {
 			payload["data"] = map[string]any{
-				"inventory_item_id":    item.ID,
-				"sku":                  item.SKU,
-				"name":                 item.Name,
-				"quantity_in_stock":    item.QuantityInStock,
-				"unit":                 item.Unit,
+				"inventory_item_id":     item.ID,
+				"sku":                   item.SKU,
+				"name":                  item.Name,
+				"quantity_in_stock":     item.QuantityInStock,
+				"unit":                  item.Unit,
 				"affected_pos_products": affectedProducts,
 			}
 		}
@@ -122,6 +122,7 @@ func FireWebhookEvent(event string, item *models.InventoryItem) {
 				log.Printf("webhook: failed to send to %s: %v", sub.URL, err)
 			}
 		}
+		log.Printf("webhook: event %s sent to %d subscriptions", event, len(subs))
 	}()
 }
 

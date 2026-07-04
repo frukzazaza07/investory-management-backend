@@ -164,7 +164,6 @@ func DeductStockForSale(posOrderID string, items []POSSaleItem) (*DeductResult, 
 		}
 		FireWebhookEvent(event, item)
 	}
-
 	return &DeductResult{
 		POSOrderID:    posOrderID,
 		Status:        "processed",
@@ -209,9 +208,9 @@ func GetStockLevels() ([]StockLevel, error) {
 }
 
 type ProductAvailability struct {
-	POSProductID string              `json:"pos_product_id"`
-	Name         string              `json:"name"`
-	IsAvailable  bool                `json:"is_available"`
+	POSProductID string               `json:"pos_product_id"`
+	Name         string               `json:"name"`
+	IsAvailable  bool                 `json:"is_available"`
 	Details      []AvailabilityDetail `json:"details"`
 }
 
