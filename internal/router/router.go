@@ -11,6 +11,10 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
+	app.Get("/health", func(c fiber.Ctx) error {
+		return response.Success(c, "ok", nil)
+	})
+
 	app.Get("/swagger/doc.json", func(c fiber.Ctx) error {
 		doc, err := swag.ReadDoc()
 		if err != nil {
