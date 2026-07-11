@@ -53,7 +53,7 @@ func main() {
 
 	if certFile != "" && keyFile != "" {
 		log.Printf("listening on https://localhost:%s", port)
-		log.Fatal(app.Listen(":"+port, fiber.ListenConfig{CertFile: certFile, CertKeyFile: keyFile}))
+		// log.Fatal(app.Listen(":"+port, fiber.ListenConfig{CertFile: certFile, CertKeyFile: keyFile}))
 	} else {
 		log.Printf("listening on http://localhost:%s", port)
 		log.Fatal(app.Listen(":" + port))
