@@ -7,7 +7,6 @@ import (
 	"investory-management-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/swaggo/swag"
 )
 
@@ -15,11 +14,6 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/health", func(c fiber.Ctx) error {
 		return response.Success(c, "ok", nil)
 	})
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"https://investory-management-backend-production.up.railway.app"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-	}))
 
 	app.Get("/swagger/doc.json", func(c fiber.Ctx) error {
 		doc, err := swag.ReadDoc()

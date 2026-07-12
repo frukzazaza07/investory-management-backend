@@ -36,9 +36,12 @@ func main() {
 	app.Use(middleware.Language)
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:5173"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Authorization", "X-API-Key"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"https://investory-management-frontend-chi.vercel.app",
+		},
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization", "X-API-Key"},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 	}))
 
 	router.SetupRoutes(app)
